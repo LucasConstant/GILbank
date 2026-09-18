@@ -13,8 +13,6 @@ use App\Models\LimitRequest;
 use App\Models\Movement;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 
 class DatabaseSeeder extends Seeder
 {

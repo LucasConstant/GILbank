@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! Auth::user()?->role->isStaff()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Clientes devem acessar pelo aplicativo web do cliente.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
