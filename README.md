@@ -1,58 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# GILbank
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema bancário simulado com Laravel monolítico e frontend cliente em Svelte 5.
 
-## About Laravel
+## Visão geral
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Backend em Laravel 13 com Blade, Breeze e Sanctum.
+- Frontend SPA em /frontend com Vite + Svelte 5.
+- Autorização por papéis: gerente geral, gerente de conta e cliente.
+- Auditoria com Laravel Auditing e Mailtrap para credenciais.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Arquitetura
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```mermaid
+flowchart LR
+    User[Cliente] --> SPA[Svelte SPA /frontend]
+    SPA --> API[Laravel API /api\nSanctum token]
+    Manager[Gerente] --> Web[Laravel Blade /web\nBreeze session]
+    API --> Laravel[Laravel App]
+    Web --> Laravel
+    Laravel --> DB[(MySQL / SQLite)]
+    Laravel --> Mail[Mailtrap]
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Instalação
 
-## Contributing
+1. Copie .env.example para .env.
+2. Configure banco e Mailtrap.
+3. Rode:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer install
+npm install
+php artisan key:generate
+php artisan migrate:fresh --seed
+```
 
-## Code of Conduct
+4. Inicie o backend:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan serve
+```
 
-## Security Vulnerabilities
+5. Inicie o frontend:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## License
+## Credenciais de teste
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Gerente geral: geral@gilbank.local / password
+- Gerente de conta: maria.gerente@gilbank.local / password
+- Gerente de conta: joao.gerente@gilbank.local / password
+- Cliente: ana.cliente@gilbank.local / password
+- Cliente: bruno.cliente@gilbank.local / password
+- Cliente: carla.cliente@gilbank.local / password
+- Cliente: diego.cliente@gilbank.local / password
+- Cliente: elisa.cliente@gilbank.local / password
+
+## Modelagem principal
+
+```mermaid
+erDiagram
+    USERS ||--o| CONTAS : possui
+    USERS ||--o{ SOLICITACOES : envia
+    CONTAS ||--o{ MOVIMENTACOES : registra
+    CONTAS ||--o{ APLICACOES : tem
+    USERS ||--o{ AUDITS : realiza
+```
+
+## Observações
+
+- A rota raiz redireciona usuários autenticados para o dashboard.
+- A API é exclusiva para clientes; gerentes usam sessão web.
+- O diretório bootstrap/cache precisa ser gravável no ambiente local.
+
+## Licença
+
+MIT
