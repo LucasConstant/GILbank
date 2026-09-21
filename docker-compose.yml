@@ -1,0 +1,80 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gilbank-app
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:CiAVflG0m0ggjxyJAPCXNwD1UqH+gZYoZiEpYhvxkpI=
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: gilbank
+      DB_USERNAME: gilbank
+      DB_PASSWORD: gilbank
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+    command: php -S 0.0.0.0:8000 -t public
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+    stdin_open: true
+
+  db:
+    image: mysql:8.4
+    container_name: gilbank-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: gilbank
+      MYSQL_USER: gilbank
+      MYSQL_PASSWORD: gilbank
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: gilbank-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8080:80"
+
+  frontend:
+    image: node:20
+    container_name: gilbank-frontend
+    working_dir: /var/www/frontend
+    volumes:
+      - .:/var/www
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    environment:
+      VITE_API_URL: http://localhost:8000
+
+volumes:
+  mysql-data:

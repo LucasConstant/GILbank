@@ -2,6 +2,10 @@
 
 return [
 
+    'mailtrap' => [
+        'api_token' => env('MAILTRAP_API_TOKEN'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
